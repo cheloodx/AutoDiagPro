@@ -233,7 +233,7 @@ class OBD2BluetoothManager: NSObject, ObservableObject {
             return
         }
 
-        let pidHex = String(hex.dropFirst(2).prefix(2))
+        let pidHex = String(hex.dropFirst(2).prefix(2)).uppercased()
         let dataHex = String(hex.dropFirst(4))
 
         switch pidHex {
@@ -275,7 +275,7 @@ class OBD2BluetoothManager: NSObject, ObservableObject {
             if let byteA = UInt8(dataHex.prefix(2), radix: 16) {
                 let temp = Double(byteA) - 40
                 DispatchQueue.main.async { [weak self] in
-                    self?.liveData.oilPressure = max(0.5, temp / 40.0) // Approximate
+                    self?.liveData.oilTemp = temp
                 }
             }
 
@@ -395,7 +395,7 @@ extension OBD2BluetoothManager: CBPeripheralDelegate {
         responseBuffer += response
 
         // ELM327 responses end with ">" prompt
-        if responseBuffer.contains(">") || responseBuffer.contains("\r\r") {
+        if responseBuffer.contains(">") {
             let fullResponse = responseBuffer
             responseBuffer = ""
             processResponse(fullResponse)
